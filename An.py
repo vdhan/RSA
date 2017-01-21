@@ -35,6 +35,14 @@ def trim(m):
     return ' '.join(l)
 
 
+def trim_space(s):
+    """Trim just space"""
+    t = s.strip()
+    while '  ' in t:
+        t = t.replace('  ', ' ')
+    return t
+
+
 def gcd(*a):
     """Return the greatest common divisor for 2 or more numbers"""
     if len(a) < 2:
@@ -80,7 +88,7 @@ def is_finite(n):
     try:
         a = float(n)
         return math.isfinite(a)
-    except:
+    except ValueError:
         return False
 
 
@@ -89,7 +97,7 @@ def is_num(n):
     try:
         a = float(n)
         return not math.isnan(a)
-    except:
+    except ValueError:
         return False
 
 
@@ -97,12 +105,12 @@ def is_int(n):
     """Check if integer"""
     try:
         return n[1:].isdigit() if n[0] in ('-', '+') else n.isdigit()
-    except:
+    except TypeError:
         pass
 
     try:
         return int(n) == n
-    except:
+    except OverflowError:
         return False
 
 
@@ -198,7 +206,7 @@ def dfs(g, s, d, p=None):
     if not p:
         p = []
 
-    p = p + [s]
+    p += [s]
     if s == d:
         return p
 
