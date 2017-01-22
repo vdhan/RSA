@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import math
 import os
 import random
+import subprocess
 from tkinter import *
 from tkinter.ttk import *
 
-from An import trim, is_prime
+from An import trim
 
 
 class Core(Tk):
@@ -51,6 +52,7 @@ class Application(Notebook):
         self.frame1 = Frame(self, padding=10)
         self.frame2 = Frame(self, padding=10)
         self.frame3 = Frame(self, padding=10)
+        self.frame4 = Frame(self, padding=10)
 
         self.it = Text(self.frame1, width=62, height=5)
         self.n_str = StringVar()
@@ -73,6 +75,7 @@ class Application(Notebook):
         self.add(self.frame1, text='Mã hóa và Giải mã')
         self.add(self.frame2, text='Tìm khóa d')
         self.add(self.frame3, text='Tìm khóa e')
+        self.add(self.frame4, text='Tìm p, q')
 
         Label(self.frame1, text='Nhập: ').grid(row=0, column=0, sticky='e')
         self.it.grid(row=0, column=1, columnspan=3, pady=10, sticky='e')
@@ -121,10 +124,25 @@ class Application(Notebook):
 
         Button(self.frame3, text='Tìm khóa', command=self.find_e).grid(row=3, column=2)
 
+        self.str_l.set(2048)
+        Label(self.frame4, text='Độ dài khóa: ').grid(row=0, column=0)
+        Entry(self.frame4, textvariable=self.str_l).grid(row=0, column=1)
+
+        Label(self.frame4, text='p: ').grid(row=1, column=0)
+        Entry(self.frame4, textvariable=self.p_str, state='readonly').grid(row=1, column=1)
+
+        Label(self.frame4, text='q: ').grid(row=1, column=3)
+        Entry(self.frame4, textvariable=self.q_str, state='readonly').grid(row=1, column=4)
+
+        Button(self.frame4, text='Tìm p, q', command=self.find_pq).grid(row=2, column=2)
+
         for child in self.frame2.winfo_children():
             child.grid_configure(pady=10)
 
         for child in self.frame3.winfo_children():
+            child.grid_configure(pady=10)
+
+        for child in self.frame4.winfo_children():
             child.grid_configure(pady=10)
 
         self.it.focus()
@@ -226,34 +244,17 @@ class Application(Notebook):
     def entry_selectall(event):
         event.widget.select_range(0, 'end')
 
-    @staticmethod
-    def random_prime(bit=16, start=3):
-        if bit > 16:
-            start = 2**(bit - 1)
-
-        end = 2**bit - 1
-        num = random.randint(start, end)
-        if num % 2 == 0:
-            num += 1
-
-        while True:
-            if num < start:
-                continue
-
-            if is_prime(num):
-                return num
-
-            num = (num + 2) % end
-
     def find_pq(self):
         try:
             l = int(self.str_l.get())
             length = l // 2
 
-            p = self.random_prime(length)
+            process = subprocess.run(['openssl', 'prime', '-generate', '-bits', str(length)], stdout=subprocess.PIPE)
+            p = int(process.stdout)
             self.p_str.set(p)
 
-            q = self.random_prime(length)
+            process = subprocess.run(['openssl', 'prime', '-generate', '-bits', str(length)], stdout=subprocess.PIPE)
+            q = int(process.stdout)
             self.q_str.set(q)
         except ValueError:
             self.p_str.set('Input Error!')
